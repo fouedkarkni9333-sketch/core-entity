@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Living Core - الكيان الحي المتطور</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        body {
+            background-color: #050508;
+            color: #00ffcc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #0c0c14;
+            border: 1px solid #1f1f38;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.05);
+        }
+        h1 {
+            font-size: 1.4rem;
+            color: #ff5555;
+            text-align: center;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            font-size: 0.8rem;
+            color: #666688;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .status-box {
+            background: #06060a;
+            border: 1px solid #1a1a2e;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .status-row:last-child {
+            margin-bottom: 0;
+        }
+        .label {
+            color: #8888aa;
+        }
+        .value {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        canvas {
+            width: 100%;
+            height: 150px;
+            background: #030305;
+            border: 1px solid #1a1a2e;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .terminal {
+            background: #030305;
+            border: 1px solid #1a1a2e;
+            border-radius: 8px;
+            padding: 10px;
+            height: 140px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            color: #00ffcc;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            background: #06060a;
+            border: 1px solid #2a2a4e;
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            border-color: #00ffcc;
+        }
+        button {
+            background: linear-gradient(135deg, #ff5555, #ff3366);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            padding: 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Echo Core</h1>
+        <div class="subtitle">Autonomous Local Neural Entity</div>
+
+        <div class="status-box">
+            <div class="status-row">
+                <span class="label">حالة الكيان (State):</span>
+                <span class="value" id="coreState">يستيقظ ويراقب...</span>
+            </div>
+            <div class="status-row">
+                <span class="label">الجيل الحالي (Generation):</span>
+                <span class="value" id="genCount">Gen 1.00</span>
+            </div>
+            <div class="status-row">
+                <span class="label">معدل التوافق العصبي:</span>
+                <span class="value" id="syncRate">98.4%</span>
+            </div>
+        </div>
+
+        <canvas id="matrixCanvas"></canvas>
+
+        <div class="terminal" id="terminalLog">
+            [System] Initializing local neural memory...<br>
+            [Core] Core awakened in isolated workspace.<br>
+            [Ready] Awaiting user intent injection...<br>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="userInput" placeholder="أدخل أمراً أو فكرة للكيان..." autocomplete="off">
+            <button id="injectBtn">حقن الفكرة</button>
+        </div>
+    </div>
+
+    <script>
+        // تأثير نبض بصري حي على الكانفاس
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let particles = [];
+        for(let i = 0; i < 40; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8,
+                radius: Math.random() * 2 + 1
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(3, 3, 5, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ffcc';
+            ctx.strokeStyle = 'rgba(0, 255, 204, 0.15)';
+
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                for(let j = index + 1; j < particles.length; j++) {
+                    let p2 = particles[j];
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if(dist < 50) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // منطق التفاعل وحقن الأفكار
+        let generation = 1;
+        const terminalLog = document.getElementById('terminalLog');
+        const userInput = document.getElementById('userInput');
+        const injectBtn = document.getElementById('injectBtn');
+        const genCount = document.getElementById('genCount');
+        const coreState = document.getElementById('coreState');
+
+        function logMessage(msg) {
+            terminalLog.innerHTML += `<br>> ${msg}`;
+            terminalLog.scrollTop = terminalLog.scrollHeight;
+        }
+
+        injectBtn.addEventListener('click', processInput);
+        userInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') processInput();
+        });
+
+        function processInput() {
+            let text = userInput.value.trim();
+            if(!text) return;
+            
+            logMessage(`استيعاب الفكرة: "${text}"`);
+            userInput.value = "";
+            coreState.innerText = "يعيد هيكلة الخوارزميات...";
+            
+            setTimeout(() => {
+                generation += 0.05;
+                genCount.innerText = `Gen ${generation.toFixed(2)}`;
+                logMessage(`[تم التطور] تم دمج الفكرة وتوليد عقدة عصبية جديدة.`);
+                coreState.innerText = "يعمل بكفاءة مطلقة";
+            }, 1000);
+        }
+
+        // تفاعل ذاتي دوري كل فترة لجعل الكيان يبدو حياً
+        setInterval(() => {
+            const autonomousThoughts = [
+                "فحص النطاق الترددي للذاكرة المحلية...",
+                "استقرار البنية التحتية البرمجية بنجاح.",
+                "مراقبة النبض الرقمي الداخلي...",
+                "الكيان مستعد لتلقي أي مدخلات جديدة."
+            ];
+            let randomThought = autonomousThoughts[Math.floor(Math.random() * autonomousThoughts.length)];
+            logMessage(randomThought);
+        }, 12000);
+    </script>
+</body>
+</html>
