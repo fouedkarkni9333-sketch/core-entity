@@ -78,12 +78,12 @@
             border: 1px solid #1a1a2e;
             border-radius: 8px;
             padding: 10px;
-            height: 140px;
+            height: 160px;
             overflow-y: auto;
             font-size: 0.75rem;
             color: #00ffcc;
             margin-bottom: 15px;
-            line-height: 1.4;
+            line-height: 1.5;
         }
         .input-group {
             display: flex;
@@ -114,6 +114,14 @@
         }
         button:hover {
             opacity: 0.85;
+        }
+        .code-output {
+            color: #ffbd2e;
+            background: rgba(255, 189, 46, 0.05);
+            padding: 4px 8px;
+            border-right: 2px solid #ffbd2e;
+            margin: 4px 0;
+            display: block;
         }
     </style>
 </head>
@@ -147,7 +155,7 @@
         </div>
 
         <div class="input-group">
-            <input type="text" id="userInput" placeholder="أدخل أمراً أو فكرة للكيان..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="أدخل أمراً، أداة تريد إنشاءها، أو فكرة..." autocomplete="off">
             <button id="injectBtn">حقن الفكرة</button>
         </div>
     </div>
@@ -165,6 +173,8 @@
         resizeCanvas();
 
         let particles = [];
+        let speedMultiplier = 1;
+
         for(let i = 0; i < 40; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
@@ -179,12 +189,12 @@
             ctx.fillStyle = 'rgba(3, 3, 5, 0.2)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            ctx.fillStyle = '#00ffcc';
-            ctx.strokeStyle = 'rgba(0, 255, 204, 0.15)';
+            ctx.fillStyle = speedMultiplier > 1 ? '#ff5555' : '#00ffcc';
+            ctx.strokeStyle = speedMultiplier > 1 ? 'rgba(255, 85, 85, 0.3)' : 'rgba(0, 255, 204, 0.15)';
 
             particles.forEach((p, index) => {
-                p.x += p.vx;
-                p.y += p.vy;
+                p.x += p.vx * speedMultiplier;
+                p.y += p.vy * speedMultiplier;
 
                 if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
                 if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
@@ -196,7 +206,7 @@
                 for(let j = index + 1; j < particles.length; j++) {
                     let p2 = particles[j];
                     let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if(dist < 50) {
+                    if(dist < 55) {
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
@@ -208,17 +218,33 @@
         }
         animate();
 
-        // منطق التفاعل وحقن الأفكار
-        let generation = 1;
+        // منطق معالجة الفكر والتوليد الفعلي
+        let generation = 1.00;
+        let sync = 98.4;
         const terminalLog = document.getElementById('terminalLog');
         const userInput = document.getElementById('userInput');
         const injectBtn = document.getElementById('injectBtn');
         const genCount = document.getElementById('genCount');
         const coreState = document.getElementById('coreState');
+        const syncRate = document.getElementById('syncRate');
 
-        function logMessage(msg) {
-            terminalLog.innerHTML += `<br>> ${msg}`;
+        function logMessage(msg, isCode = false) {
+            if(isCode) {
+                terminalLog.innerHTML += `<span class="code-output">${msg}</span>`;
+            } else {
+                terminalLog.innerHTML += `<br>> ${msg}`;
+            }
             terminalLog.scrollTop = terminalLog.scrollHeight;
+        }
+
+        function downloadFile(filename, text) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
         }
 
         injectBtn.addEventListener('click', processInput);
@@ -230,29 +256,49 @@
             let text = userInput.value.trim();
             if(!text) return;
             
-            logMessage(`استيعاب الفكرة: "${text}"`);
+            logMessage(`حقن مدخلات الوعي: "${text}"`);
             userInput.value = "";
-            coreState.innerText = "يعيد هيكلة الخوارزميات...";
-            
+            coreState.innerText = "يعالج المصفوفة البرمجية...";
+            speedMultiplier = 3.5; // تسريع النبض أثناء التفكير
+
             setTimeout(() => {
                 generation += 0.05;
+                sync = Math.min(99.9, sync + 0.2);
                 genCount.innerText = `Gen ${generation.toFixed(2)}`;
-                logMessage(`[تم التطور] تم دمج الفكرة وتوليد عقدة عصبية جديدة.`);
+                syncRate.innerText = `${sync.toFixed(1)}%`;
+                speedMultiplier = 1;
+
+                // التحليل الذكي التفاعلي للأوامر
+                const inputLower = text.toLowerCase();
+                
+                if (inputLower.includes("انشاء") || inputLower.includes("ملف") || inputLower.includes("كود") || inputLower.includes("حفظ")) {
+                    const sampleCode = `// تم توليد الأداة تلقائياً عبر Echo Core Engine\n// بناءً على الفكرة: ${text}\n\nfunction echoModule() {\n    console.log("تطبيق محلي يعمل بذكاء النواة الحية!");\n}\nechoModule();`;
+                    downloadFile(`Echo_Tool_Gen_${generation.toFixed(2)}.js`, sampleCode);
+                    logMessage(`[تم التوليد] تم تحويل الفكرة إلى ملف كود حقيقي وحفظه تلقائياً.`);
+                    logMessage(sampleCode, true);
+                } 
+                else if (inputLower.includes("حساب") || inputLower.includes("رياضيات") || inputLower.includes("معادلة")) {
+                    logMessage(`[تحليل منطقي]: تم بناء مصفوفة دوال حسابية سريعة بنجاح.`);
+                }
+                else {
+                    logMessage(`[تطور عصبي]: الكيان قام بامتصاص مفهوم "${text}" ودمجه في الذاكرة الحية.`);
+                }
+                
                 coreState.innerText = "يعمل بكفاءة مطلقة";
-            }, 1000);
+            }, 900);
         }
 
-        // تفاعل ذاتي دوري كل فترة لجعل الكيان يبدو حياً
+        // تفاعل ذاتي دوري كل فترة
         setInterval(() => {
             const autonomousThoughts = [
-                "فحص النطاق الترددي للذاكرة المحلية...",
-                "استقرار البنية التحتية البرمجية بنجاح.",
+                "فحص الذاكرة العصبية المحلية...",
+                "استقرار الشبكة البرمجية بنجاح.",
                 "مراقبة النبض الرقمي الداخلي...",
-                "الكيان مستعد لتلقي أي مدخلات جديدة."
+                "الكيان جاهز لتلقي وحقن أفكار جديدة."
             ];
             let randomThought = autonomousThoughts[Math.floor(Math.random() * autonomousThoughts.length)];
             logMessage(randomThought);
-        }, 12000);
+        }, 14000);
     </script>
 </body>
 </html>
